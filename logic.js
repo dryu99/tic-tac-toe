@@ -3,64 +3,81 @@
  * O = 0
  * X = 1
  */
-
-/* OBJECTS */ 
-
-// Player factory function
-const player = (playerToken) => {
-	const token = playerToken;
-	let score = 0;
-	
-	const markAt = (pos) => {
-		gameBoard.getMatrix()[pos] = token;
-
-	};
-
-	return { markAt };
-}; 
-
-// Game module
-const game = (() => {
-	let currentPlayer = 0;
-	const playerO = player(0);
-	const playerX = player(1);	
-	const winStates = [
-		[0,1,2],
-		[3,4,5],
-		[6,7,8],
-		[0,3,6],
-		[1,4,7],
-		[2,5,8],
-		[0,4,8],
-		[2,4,6] 
-	];
-
-	const getCurrentPlayer = () => currentPlayer;
-
-	const playTurn = (pos) => {		
-		if (currentPlayer) {
-			playerX.markAt(pos);
-		} else {
-			playerO.markAt(pos);
-		}
-
-		currentPlayer = Number(!currentPlayer);
-	};
-
-	return { playTurn, getCurrentPlayer };
-
-})();
-
-// GameBoard module
-const gameBoard = (() => {
-	const matrix = [0,-1,-1,-1,-1,-1,-1,-1,-1];
-	
-	const getMatrix = () => matrix;
-
-	return { getMatrix };
-})();
-
 $(document).ready(function() {
+
+	/* OBJECTS */ 
+
+	// Player factory function
+	const player = (playerToken) => {
+		const token = playerToken;
+		let score = 0;
+		
+		const markAt = (pos) => {
+			gameBoard.getMatrix()[pos] = token;
+
+		};
+
+		return { markAt };
+	}; 
+
+
+	// Game module
+	const game = (() => {
+		let currentPlayer = 0;
+		const playerO = player(0);
+		const playerX = player(1);	
+		const winStates = [
+			[0,1,2],
+			[3,4,5],
+			[6,7,8],
+			[0,3,6],
+			[1,4,7],
+			[2,5,8],
+			[0,4,8],
+			[2,4,6] 
+		];
+
+		const getCurrentPlayer = () => currentPlayer;
+
+		const _isGameOver = () => {
+			const boardMatrix = gameBoard.getMatrix();
+
+			return winStates.some( 
+				winState => winState.every(
+					pos => boardMatrix[pos] !== -1 && boardMatrix[winState[0]] === boardMatrix[pos]
+				)
+			);
+		};
+
+		const playTurn = (pos) => {		
+			if (currentPlayer) {
+				playerX.markAt(pos);
+			} else {
+				playerO.markAt(pos);
+			}
+
+			if (_isGameOver()) {
+				return false; // game has ended
+			}
+
+			currentPlayer = Number(!currentPlayer);
+			return true;
+		};
+
+		return { playTurn, getCurrentPlayer };
+	})();
+
+
+	// GameBoard module
+	const gameBoard = (() => {
+		const matrix = [-1,-1,-1,-1,-1,-1,-1,-1,-1];
+		
+		const getMatrix = () => matrix;
+
+		return { getMatrix };
+	})();
+
+
 
 	// DisplayController module
 	const displayController = (() => {
@@ -70,6 +87,7 @@ $(document).ready(function() {
 		};
 
 		const _markCell = (e) => {
+			// console.log($(this));
 
 			if (e.currentTarget.textContent !== "") return;
 			// JQUERY
@@ -81,6 +99,11 @@ $(document).ready(function() {
 			// JQUERY
 			// $(this).text(_numToToken(game.getCurrentPlayer())); 
 			
+			if (e.currentTarget.textContent === "X") {
+				e.currentTarget.classList.add("x-mark");
+			} else {
+				e.currentTarget.classList.add("y-mark");
+			}
 
 			// let pos = e.target.nodeName.toLowerCase() === "span" ? Array.prototype.indexOf.call(e.target.parentNode.parentNode.children, e.target.parentNode) :
 			// 	Array.prototype.indexOf.call(e.target.parentNode.children, e.target); // this is terrible change div/span selection logic
@@ -92,23 +115,19 @@ $(document).ready(function() {
 			let pos = e.currentTarget.nodeName.toLowerCase() === "span" ? Array.prototype.indexOf.call(e.currentTarget.parentNode.parentNode.children, e.currentTarget.parentNode) :
 			Array.prototype.indexOf.call(e.currentTarget.parentNode.children, e.currentTarget); // this is terrible change div/span selection logic
 			
-			game.playTurn(pos);
+			if (!game.playTurn(pos)) {
+				alert("SOMEONE WON");
+				// render gameover screen (flashing os?)
+				// render a button to play again
+				// prevent grid from being pressed
+			}
 		};
 
 		const render = () => {
-			// const gameBoardDiv = document.querySelector(".game-board");
-
 			for (let i = 0; i < 9; i++) {
-				const cell = $("<div>").addClass("game-cell");
+				const cell = $("<div>").click(_markCell);
 				cell.text(_numToToken(gameBoard.getMatrix()[i]));				
-				cell.click(_markCell);
-				// const cell = document.createElement("div");
-				// cell.classList.add(`game-cell`);
-				// cell.textContent = _numToToken(gameBoard.getMatrix()[i]);
-				// cell.id = i;
-				// cell.addEventListener("click", _markCell);
-
-				// gameBoardDiv.appendChild(cell);
+				cell.addClass("game-cell");
 			  $(".game-board").append(cell);
 			}
 		};
@@ -129,6 +148,7 @@ $(document).ready(function() {
  * Things I want to do/change
  * - find different mapping for tokens, I don't like X = 1, O = 2 I want it to be binary
  * - css issue when all cells are initially empty, line-height makes cells too big 
+ * - implement proper jQuery in markCell function ($(this) is not working)
  * 
  * Things I learned
  * - modules
