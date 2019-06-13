@@ -21,9 +21,9 @@ const player = (playerToken) => {
 
 // Game module
 const game = (() => {
-	let currentPlayer = 1;
-	const playerX = player(1);
-	const playerO = player(2);
+	let currentPlayer = 0;
+	const playerO = player(0);
+	const playerX = player(1);	
 
 	const getCurrentPlayer = () => currentPlayer;
 
@@ -36,13 +36,13 @@ const game = (() => {
 			pos = Array.prototype.indexOf.call(e.target.parentNode.children, e.target);			
 		}
 
-		if (currentPlayer === 1) {
+		if (currentPlayer) {
 			playerX.markAt(pos);
 		} else {
 			playerO.markAt(pos);
 		}
 
-		currentPlayer = currentPlayer === 1 ? 2 : 1;
+		currentPlayer = Number(!currentPlayer);
 	};
 
 	return { playTurn, getCurrentPlayer };
@@ -51,7 +51,7 @@ const game = (() => {
 
 // GameBoard module
 const gameBoard = (() => {
-	const matrix = [0,1,0,2,2,0,1,0,1];
+	const matrix = [-1,-1,-1,-1,-1,-1,-1,-1,-1];
 	
 	const getMatrix = () => matrix;
 
@@ -62,7 +62,8 @@ const gameBoard = (() => {
 const displayController = (() => {
 
 	const _numToToken = (num) => { 
-		return num === 1 ? "X" : num === 2 ? "O" : ""; 
+	  return num === -1 ? "" : num ? "X" : "O";
+		 
 		// maybe I could have an num-token object in displayController and just use that
 	};
 
@@ -78,7 +79,7 @@ const displayController = (() => {
 			cell.classList.add(`game-cell`);
 			cell.id = i;
 			cell.addEventListener("click", _markCell);
-			cell.addEventListener("click", game.playTurn);
+			cell.addEventListener("click", game.playTurn); // maybe combine into one event, as if the cell is already marked nothing should happen
 
 			const cellContent = document.createElement("span"); 
 			cellContent.textContent = _numToToken(gameBoard.getMatrix()[i]);
@@ -100,6 +101,7 @@ displayController.render();
 /**
  * Things I want to do/change
  * - find different mapping for tokens, I don't like X = 1, O = 2 I want it to be binary
+ * - css issue when all cells are initially empty, line-height makes cells too big 
  * 
  * Things I learned
  * - modules
