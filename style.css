@@ -1,0 +1,33 @@
+/* GENERAL STYLES */
+body {
+	font-family: Helvetica, Arial, sans-serif;
+}
+
+.game-board {
+	width: 300px;
+	height: 300px;
+
+	display: grid;
+	grid-template-columns: repeat(3, 3fr);
+	
+	margin: 0 auto;
+	border-bottom: 1px solid black;
+	border-left: 1px solid black;
+}
+
+.game-cell {
+	border-top: 1px solid black;
+	border-right: 1px solid black;
+
+	line-height: 100px;
+	text-align: center;
+
+	font-size: 30pt;
+}
+
+/* .game-cell span {
+	display: inline-block;
+	line-height: normal;
+	vertical-align: middle;
+} */
+
