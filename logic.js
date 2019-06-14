@@ -3,108 +3,108 @@
  * O = 0
  * X = 1
  */
-$(document).ready(function() {
 
-	/* OBJECTS */ 
+/* OBJECTS */ 
 
-	// Player factory function
-	const player = (playerToken) => {
-		const token = playerToken;
-		let score = 0;
-		
-		const markAt = (pos) => {
-			gameBoard.getMatrix()[pos] = token;
+// Player factory function
+const player = (playerToken) => {
+	const token = playerToken;
+	let score = 0;
+	
+	const markAt = (pos) => {
+		gameBoard.getMatrix()[pos] = token;
 
-		};
+	};
 
-		return { markAt };
-	}; 
+	return { markAt };
+}; 
 
 
-	// Game module
-	const game = (() => {
-		let currentPlayer = 0;
-		const playerO = player(0);
-		const playerX = player(1);	
-		let currentWinState = null; // exists 
-		const winStates = [
-			[0,1,2],
-			[3,4,5],
-			[6,7,8],
-			[0,3,6],
-			[1,4,7],
-			[2,5,8],
-			[0,4,8],
-			[2,4,6] 
-		];
-		
+// Game module
+const game = (() => {
+	let currentPlayer = 0;
+	const playerO = player(0);
+	const playerX = player(1);	
+	let currentWinState = null; // exists 
+	const winStates = [
+		[0,1,2],
+		[3,4,5],
+		[6,7,8],
+		[0,3,6],
+		[1,4,7],
+		[2,5,8],
+		[0,4,8],
+		[2,4,6] 
+	];
+	
 
-		const getCurrentPlayer = () => currentPlayer;
-		const getCurrentWinState = () => currentWinState;
+	const getCurrentPlayer = () => currentPlayer;
+	const getCurrentWinState = () => currentWinState;
 
-		const reset = () => {
-			currentPlayer = 0;
-			currentWinState = null;
-			gameBoard.resetBoard();
+	const reset = () => {
+		currentPlayer = 0;
+		currentWinState = null;
+		gameBoard.resetBoard();
+	}
+
+	const isGameOver = () => {
+		const boardMatrix = gameBoard.getMatrix();
+
+		let currentState = winStates.filter( // determine current game state, if able 
+			winState => winState.every(
+				pos => boardMatrix[pos] !== -1 && boardMatrix[winState[0]] === boardMatrix[pos]
+			)
+		);
+
+		if (currentState.length !== 0) { // check to see if win state exists in current game state
+			currentWinState = currentState[0]; // update win state
+			return true;
+		} else {
+			return false;
+		}
+	};
+
+	const playTurn = (pos) => {		
+		if (currentPlayer) {
+			playerX.markAt(pos);
+		} else {
+			playerO.markAt(pos);
 		}
 
-		const isGameOver = () => {
-			const boardMatrix = gameBoard.getMatrix();
+		currentPlayer = Number(!currentPlayer);
+	};
 
-			let currentState = winStates.filter( // determine current game state, if able 
-				winState => winState.every(
-					pos => boardMatrix[pos] !== -1 && boardMatrix[winState[0]] === boardMatrix[pos]
-				)
-			);
-
-			if (currentState.length !== 0) { // check to see if win state exists in current game state
-				currentWinState = currentState[0]; // update win state
-				return true;
-			} else {
-				return false;
-			}
-		};
-
-		const playTurn = (pos) => {		
-			if (currentPlayer) {
-				playerX.markAt(pos);
-			} else {
-				playerO.markAt(pos);
-			}
-
-			currentPlayer = Number(!currentPlayer);
-		};
-
-		return { 
-			getCurrentPlayer,
-			getCurrentWinState,
-			reset,
-			isGameOver,
-			playTurn };
-	})();
+	return { 
+		getCurrentPlayer,
+		getCurrentWinState,
+		reset,
+		isGameOver,
+		playTurn };
+})();
 
 
-	// GameBoard module
-	const gameBoard = (() => {
-		const matrix = [-1,-1,-1,-1,-1,-1,-1,-1,-1];
-		
-		const getMatrix = () => matrix;
+// GameBoard module
+const gameBoard = (() => {
+	const matrix = [-1,-1,-1,-1,-1,-1,-1,-1,-1];
+	
+	const getMatrix = () => matrix;
 
-		const resetBoard = () => {
-			for (let i = 0; i < matrix.length; i++) {
-				matrix[i] = -1;
-			}
-		};
+	const resetBoard = () => {
+		for (let i = 0; i < matrix.length; i++) {
+			matrix[i] = -1;
+		}
+	};
 
-		return { getMatrix, resetBoard };
-	})();
+	return { getMatrix, resetBoard };
+})();
 
 
+$(document).ready(function() {	
 	// DisplayController module
 	const displayController = (() => {
 		let blinker = null;
 		
-		const initialRender = () => {
+		const render = () => {
 			for (let i = 0; i < 9; i++) {
 				const cell = $("<div>").click(_markCell);
 				cell.text(_numToToken(gameBoard.getMatrix()[i]));				
@@ -119,10 +119,11 @@ $(document).ready(function() {
 			game.reset();
 			$(".game-board").children().text("");
 			$(".game-board").children().attr("class", "game-cell"); // reset all cell classes
+			$(".game-board").children().click(_markCell); 
 			$(".reset-btn").text("Reset");
 
 			clearInterval(blinker); // stop interval
-		}
+		};
 
 		const _numToToken = (num) => { 
 			return num === -1 ? "" : num ? "X" : "O";
@@ -143,24 +144,18 @@ $(document).ready(function() {
 
 				blinker = setInterval(_blink, 300);				
 			}	
-				// render gameover screen (flashing os?)
-				// render a button to play again
-				// prevent grid from being pressed
-			
 		};
 
 		const _blink = () => {			
 			game.getCurrentWinState().forEach(index => {
 				$(".game-cell").eq(index).toggleClass("hidden");							
 			}); 
-
-			// clearInterval();
 		}
 
-		return { initialRender };
+		return { render };
 	})();		
 
-	displayController.initialRender();
+	displayController.render();
 });
 
 

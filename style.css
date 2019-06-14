@@ -3,21 +3,19 @@ body {
 	font-family: Helvetica, Arial, sans-serif;
 }
 
-/* .hidden {
-	display: none;
-} */
-
-/* BUTTON STYLES */
-
-.btn-panel {
-	margin-top: 20px;
-
+header {
+	margin: 15px auto;
 	text-align: center;
 }
 
-.reset-btn {
-	font-size: 14pt;
+header .title {
+	font-size: 35pt;
+	font-weight: bold;
 }
+
+/* .hidden {
+	display: none;
+} */
 
 /* GAME BOARD STYLES */
 
@@ -41,14 +39,14 @@ body {
 	display: grid;
 	grid-template-columns: repeat(3, 3fr);
 	
-	margin: 50px auto 0 auto;
-	border-bottom: 1px solid black;
-	border-left: 1px solid black;
+	margin: 0 auto;
+	border-bottom: 2px solid black;
+	border-left: 2px solid black;
 }
 
 .game-cell {
-	border-top: 1px solid black;
-	border-right: 1px solid black;
+	border-top: 2px solid black;
+	border-right: 2px solid black;
 
 	line-height: 100px;
 	text-align: center;
@@ -57,4 +55,27 @@ body {
 	font-weight: bold;
 }
 
+/* BUTTON STYLES */
 
+.btn-panel {
+	margin-top: 20px;
+
+	text-align: center;
+}
+
+.reset-btn {
+	border: 1px solid black;
+	border-radius: 20px;
+
+	background-color: white;
+
+	font-size: 14pt;
+}
+
+/* MESSAGE DISPLAY STYLES */
+
+.msg-panel {
+	margin-top: 20px;
+
+	text-align: center;
+}
