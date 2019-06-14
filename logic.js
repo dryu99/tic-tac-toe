@@ -117,6 +117,8 @@ $(document).ready(function() {
 				$(".game-board").children().off("click"); // remove all click handlers
 
 				setInterval(_blink, 300);
+
+				$(".reset-btn").text("Play Again?");
 			}	
 				// render gameover screen (flashing os?)
 				// render a button to play again
@@ -124,22 +126,13 @@ $(document).ready(function() {
 			
 		};
 
-		const _blink = () => {
-
-			let cws = game.getCurrentWinState();
-
-			console.log(cws[0]);
-
-			// for (let i = 0; i < cws.length; i++) {
-			// 	console.log(cws[i]);
-			// }
-
+		const _blink = () => {			
 			game.getCurrentWinState().forEach(index => {
-				// console.log($(".game-cell").get(index));
-				// .addClass("hidden");
+				console.log()
+				$(".game-cell").eq(index).toggleClass("hidden");							
 			}); 
 
-			clearInterval();
+			// clearInterval();
 		}
 
 
