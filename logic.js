@@ -25,7 +25,7 @@ const game = (() => {
 	let currentPlayer = 0;
 	const playerO = player(0);
 	const playerX = player(1);	
-	let currentWinState = null; // exists 
+	let currentWinState = null; 
 	const winStates = [
 		[0,1,2],
 		[3,4,5],
@@ -35,8 +35,7 @@ const game = (() => {
 		[2,5,8],
 		[0,4,8],
 		[2,4,6] 
-	];
-	
+	];	
 
 	const getCurrentPlayer = () => currentPlayer;
 	const getCurrentWinState = () => currentWinState;
@@ -141,7 +140,7 @@ $(document).ready(function() {
 
 			if (game.isGameOver()) {
 				$(".game-board").children().off("click"); 
-				$(".reset-btn").text("Play Again?");
+				$(".reset-btn").text("New Game");
 				$(".msg-panel .turn-display").text(_numToTokenEmoji(!game.getCurrentPlayer()) + " won!!!");
 
 				blinker = setInterval(_blink, 300);				
@@ -183,6 +182,7 @@ $(document).ready(function() {
  * - add tie implementation
  * - clean up isGameOver, condition is kinda iffy don't like how there are unintuitive vars 
  * - make tokens rain after someone wins 
+ * - implement hovering effect
  * 
  * Things I learned
  * - modules
