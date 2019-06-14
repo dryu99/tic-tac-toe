@@ -42,7 +42,6 @@ const game = (() => {
 	const getCurrentWinState = () => currentWinState;
 
 	const reset = () => {
-		currentPlayer = 0;
 		currentWinState = null;
 		gameBoard.resetBoard();
 	}
@@ -107,7 +106,7 @@ $(document).ready(function() {
 		const render = () => {
 			for (let i = 0; i < 9; i++) {
 				const cell = $("<div>").click(_markCell);
-				cell.text(_numToToken(gameBoard.getMatrix()[i]));				
+				cell.text(_numToTokenString(gameBoard.getMatrix()[i]));				
 				cell.addClass("game-cell");
 			  $(".game-board").append(cell);
 			}
@@ -122,11 +121,10 @@ $(document).ready(function() {
 			$(".game-board").children().click(_markCell); 
 			$(".reset-btn").text("Reset");
 
-			clearInterval(blinker); // stop interval
-		};
+			$(".msg-panel .intro-display").css("display", "inline");
+			$(".msg-panel .turn-display").text((_numToTokenEmoji(game.getCurrentPlayer())) + " goes first!");
 
-		const _numToToken = (num) => { 
-			return num === -1 ? "" : num ? "X" : "O";
+			clearInterval(blinker); // stop interval
 		};
 
 		const _markCell = (e) => {
@@ -134,13 +132,17 @@ $(document).ready(function() {
 			
 			if (cell.text() !== "") return;
 
-			cell.text(_numToToken(game.getCurrentPlayer()));			
+			cell.text(_numToTokenString(game.getCurrentPlayer()));			
 			cell.addClass(cell.text() === "X" ? "x-token" : "y-token");	
 			game.playTurn(cell.index());
 
+			$(".msg-panel .intro-display").css("display", "none");
+			$(".msg-panel .turn-display").text("It's " + (_numToTokenEmoji(game.getCurrentPlayer())) + "'s turn");
+
 			if (game.isGameOver()) {
-				$(".game-board").children().off("click"); // remove all click handlers
+				$(".game-board").children().off("click"); 
 				$(".reset-btn").text("Play Again?");
+				$(".msg-panel .turn-display").text(_numToTokenEmoji(!game.getCurrentPlayer()) + " won!!!");
 
 				blinker = setInterval(_blink, 300);				
 			}	
@@ -151,6 +153,14 @@ $(document).ready(function() {
 				$(".game-cell").eq(index).toggleClass("hidden");							
 			}); 
 		}
+
+		const _numToTokenString = (num) => { 
+			return num === -1 ? "" : num ? "X" : "O";
+		};
+
+		const _numToTokenEmoji = (num) => { 
+			return num == 0 ? "⭕" : "❌"; // soft comparison in case I want to pass in opposite val
+		};
 
 		return { render };
 	})();		
@@ -168,9 +178,11 @@ $(document).ready(function() {
  * Things I want to do/change
  * - find different mapping for tokens, I don't like X = 1, O = 2 I want it to be binary
  * - css issue when all cells are initially empty, line-height makes cells too big 
- * - implement proper jQuery in markCell function ($(this) is not working)
+ * - implement proper jQuery in markCell function ($(this) is not working)***
+ * 			KINDA fixed, couldn't use this but made jQuery object out of e.target, good enough for now
  * - add tie implementation
  * - clean up isGameOver, condition is kinda iffy don't like how there are unintuitive vars 
+ * - make tokens rain after someone wins 
  * 
  * Things I learned
  * - modules
