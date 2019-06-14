@@ -26,7 +26,7 @@ $(document).ready(function() {
 		let currentPlayer = 0;
 		const playerO = player(0);
 		const playerX = player(1);	
-		const currentWinState = [];
+		let currentWinState = null; // exists 
 		const winStates = [
 			[0,1,2],
 			[3,4,5],
@@ -40,17 +40,19 @@ $(document).ready(function() {
 		
 
 		const getCurrentPlayer = () => currentPlayer;
+		const getCurrentWinState = () => currentWinState;
 
 		const isGameOver = () => {
 			const boardMatrix = gameBoard.getMatrix();
 
-			currentWinState.push(...winStates.filter( // update current win state, if able 
+			let currentState = winStates.filter( // determine current game state, if able 
 				winState => winState.every(
 					pos => boardMatrix[pos] !== -1 && boardMatrix[winState[0]] === boardMatrix[pos]
 				)
-			));
+			);
 
-			if (currentWinState.length !== 0) { // check to see if win state exists
+			if (currentState.length !== 0) { // check to see if win state exists in current game state
+				currentWinState = currentState[0]; // update win state
 				return true;
 			} else {
 				return false;
@@ -67,7 +69,11 @@ $(document).ready(function() {
 			currentPlayer = Number(!currentPlayer);
 		};
 
-		return { getCurrentPlayer, isGameOver, playTurn };
+		return { 
+			getCurrentPlayer,
+			getCurrentWinState,
+			isGameOver,
+			playTurn };
 	})();
 
 
@@ -109,7 +115,8 @@ $(document).ready(function() {
 
 			if (game.isGameOver()) {
 				$(".game-board").children().off("click"); // remove all click handlers
-				// setInterval(_blink, 300);
+
+				setInterval(_blink, 300);
 			}	
 				// render gameover screen (flashing os?)
 				// render a button to play again
@@ -117,9 +124,23 @@ $(document).ready(function() {
 			
 		};
 
-		// const _blink = () => {
-		// 	if 
-		// }
+		const _blink = () => {
+
+			let cws = game.getCurrentWinState();
+
+			console.log(cws[0]);
+
+			// for (let i = 0; i < cws.length; i++) {
+			// 	console.log(cws[i]);
+			// }
+
+			game.getCurrentWinState().forEach(index => {
+				// console.log($(".game-cell").get(index));
+				// .addClass("hidden");
+			}); 
+
+			clearInterval();
+		}
 
 
 
@@ -140,7 +161,8 @@ $(document).ready(function() {
  * - find different mapping for tokens, I don't like X = 1, O = 2 I want it to be binary
  * - css issue when all cells are initially empty, line-height makes cells too big 
  * - implement proper jQuery in markCell function ($(this) is not working)
- * - add tie implementation 
+ * - add tie implementation
+ * - clean up isGameOver, condition is kinda iffy don't like how there are unintuitive vars 
  * 
  * Things I learned
  * - modules
@@ -165,4 +187,6 @@ $(document).ready(function() {
  * 
  * - can't figure out how to pass in an already declared callback function into .click(), and have access to the targetted DOM node using $(this). 
  * 			I can only do it using e.currentTarget, but I dont know why $(this) isn't working sigh
+ * 
+ * - not sure why current game state is an array of arrays
  */
