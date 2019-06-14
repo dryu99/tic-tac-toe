@@ -26,7 +26,7 @@ $(document).ready(function() {
 		let currentPlayer = 0;
 		const playerO = player(0);
 		const playerX = player(1);	
-		let currentWinState = [];
+		const currentWinState = [];
 		const winStates = [
 			[0,1,2],
 			[3,4,5],
@@ -44,15 +44,13 @@ $(document).ready(function() {
 		const isGameOver = () => {
 			const boardMatrix = gameBoard.getMatrix();
 
-			currentWinState = winStates.filter( 
+			currentWinState.push(...winStates.filter( // update current win state, if able 
 				winState => winState.every(
 					pos => boardMatrix[pos] !== -1 && boardMatrix[winState[0]] === boardMatrix[pos]
 				)
-			);
+			));
 
-			console.log(currentWinState);
-
-			if (currentWinState.length !== 0) {
+			if (currentWinState.length !== 0) { // check to see if win state exists
 				return true;
 			} else {
 				return false;
@@ -110,8 +108,7 @@ $(document).ready(function() {
 			game.playTurn(cell.index());
 
 			if (game.isGameOver()) {
-				$(".game-board").children().off("false"); // remove all click handlers
-				console.log("reach");
+				$(".game-board").children().off("click"); // remove all click handlers
 				// setInterval(_blink, 300);
 			}	
 				// render gameover screen (flashing os?)
