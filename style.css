@@ -7,11 +7,11 @@ body {
 
 /* GAME BOARD STYLES */
 
-.x-mark {
+.x-token {
 	color: red;
 }
 
-.y-mark {
+.y-token {
 	color: blue;
 }
 

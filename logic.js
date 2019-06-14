@@ -26,6 +26,7 @@ $(document).ready(function() {
 		let currentPlayer = 0;
 		const playerO = player(0);
 		const playerX = player(1);	
+		let currentWinState = [];
 		const winStates = [
 			[0,1,2],
 			[3,4,5],
@@ -36,17 +37,26 @@ $(document).ready(function() {
 			[0,4,8],
 			[2,4,6] 
 		];
+		
 
 		const getCurrentPlayer = () => currentPlayer;
 
-		const _isGameOver = () => {
+		const isGameOver = () => {
 			const boardMatrix = gameBoard.getMatrix();
 
-			return winStates.some( 
+			currentWinState = winStates.filter( 
 				winState => winState.every(
 					pos => boardMatrix[pos] !== -1 && boardMatrix[winState[0]] === boardMatrix[pos]
 				)
 			);
+
+			console.log(currentWinState);
+
+			if (currentWinState.length !== 0) {
+				return true;
+			} else {
+				return false;
+			}
 		};
 
 		const playTurn = (pos) => {		
@@ -56,15 +66,10 @@ $(document).ready(function() {
 				playerO.markAt(pos);
 			}
 
-			if (_isGameOver()) {
-				return false; // game has ended
-			}
-
 			currentPlayer = Number(!currentPlayer);
-			return true;
 		};
 
-		return { playTurn, getCurrentPlayer };
+		return { getCurrentPlayer, isGameOver, playTurn };
 	})();
 
 
@@ -81,48 +86,7 @@ $(document).ready(function() {
 
 	// DisplayController module
 	const displayController = (() => {
-
-		const _numToToken = (num) => { 
-			return num === -1 ? "" : num ? "X" : "O";
-		};
-
-		const _markCell = (e) => {
-			// console.log($(this));
-
-			if (e.currentTarget.textContent !== "") return;
-			// JQUERY
-			// if ($(this).text() !== "") return;
-			
-
-			// e.target.textContent = _numToToken(game.getCurrentPlayer()); // mark cell with current player token
-			e.currentTarget.textContent = _numToToken(game.getCurrentPlayer());
-			// JQUERY
-			// $(this).text(_numToToken(game.getCurrentPlayer())); 
-			
-			if (e.currentTarget.textContent === "X") {
-				e.currentTarget.classList.add("x-mark");
-			} else {
-				e.currentTarget.classList.add("y-mark");
-			}
-
-			// let pos = e.target.nodeName.toLowerCase() === "span" ? Array.prototype.indexOf.call(e.target.parentNode.parentNode.children, e.target.parentNode) :
-			// 	Array.prototype.indexOf.call(e.target.parentNode.children, e.target); // this is terrible change div/span selection logic
-
-			// JQUERY
-			// let pos = $(this).prop("tagName").toLowerCase() === "span" ? Array.prototype.indexOf.call($(this).parent().parent().children(), $(this).parent()) :
-			// 	Array.prototype.indexOf.call($(this).parent().children(), $(this));
-
-			let pos = e.currentTarget.nodeName.toLowerCase() === "span" ? Array.prototype.indexOf.call(e.currentTarget.parentNode.parentNode.children, e.currentTarget.parentNode) :
-			Array.prototype.indexOf.call(e.currentTarget.parentNode.children, e.currentTarget); // this is terrible change div/span selection logic
-			
-			if (!game.playTurn(pos)) {
-				alert("SOMEONE WON");
-				// render gameover screen (flashing os?)
-				// render a button to play again
-				// prevent grid from being pressed
-			}
-		};
-
+		
 		const render = () => {
 			for (let i = 0; i < 9; i++) {
 				const cell = $("<div>").click(_markCell);
@@ -131,6 +95,36 @@ $(document).ready(function() {
 			  $(".game-board").append(cell);
 			}
 		};
+
+		const _numToToken = (num) => { 
+			return num === -1 ? "" : num ? "X" : "O";
+		};
+
+		const _markCell = (e) => {
+			let cell = $(e.target);
+			
+			if (cell.text() !== "") return;
+
+			cell.text(_numToToken(game.getCurrentPlayer()));			
+			cell.addClass(cell.text() === "X" ? "x-token" : "y-token");	
+			game.playTurn(cell.index());
+
+			if (game.isGameOver()) {
+				$(".game-board").children().off("false"); // remove all click handlers
+				console.log("reach");
+				// setInterval(_blink, 300);
+			}	
+				// render gameover screen (flashing os?)
+				// render a button to play again
+				// prevent grid from being pressed
+			
+		};
+
+		// const _blink = () => {
+		// 	if 
+		// }
+
+
 
 		return { render };
 	})();		
@@ -149,11 +143,13 @@ $(document).ready(function() {
  * - find different mapping for tokens, I don't like X = 1, O = 2 I want it to be binary
  * - css issue when all cells are initially empty, line-height makes cells too big 
  * - implement proper jQuery in markCell function ($(this) is not working)
+ * - add tie implementation 
  * 
  * Things I learned
  * - modules
  * - factory functions
  * - avoiding populating global namespace 
+ * - using jQuery to simplify DOM manipulation (makes code much more succint)
  * 
  * Problems I faced
  * - clicking on a cell wouldn't give me its correct position in respect to its pos in game board children divs.
