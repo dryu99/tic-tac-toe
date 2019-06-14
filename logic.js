@@ -42,6 +42,12 @@ $(document).ready(function() {
 		const getCurrentPlayer = () => currentPlayer;
 		const getCurrentWinState = () => currentWinState;
 
+		const reset = () => {
+			currentPlayer = 0;
+			currentWinState = null;
+			gameBoard.resetBoard();
+		}
+
 		const isGameOver = () => {
 			const boardMatrix = gameBoard.getMatrix();
 
@@ -72,6 +78,7 @@ $(document).ready(function() {
 		return { 
 			getCurrentPlayer,
 			getCurrentWinState,
+			reset,
 			isGameOver,
 			playTurn };
 	})();
@@ -83,22 +90,39 @@ $(document).ready(function() {
 		
 		const getMatrix = () => matrix;
 
-		return { getMatrix };
-	})();
+		const resetBoard = () => {
+			for (let i = 0; i < matrix.length; i++) {
+				matrix[i] = -1;
+			}
+		};
 
+		return { getMatrix, resetBoard };
+	})();
 
 
 	// DisplayController module
 	const displayController = (() => {
+		let blinker = null;
 		
-		const render = () => {
+		const initialRender = () => {
 			for (let i = 0; i < 9; i++) {
 				const cell = $("<div>").click(_markCell);
 				cell.text(_numToToken(gameBoard.getMatrix()[i]));				
 				cell.addClass("game-cell");
 			  $(".game-board").append(cell);
 			}
+
+			$(".reset-btn").click(_reset);
 		};
+
+		const _reset = (e) => {
+			game.reset();
+			$(".game-board").children().text("");
+			$(".game-board").children().attr("class", "game-cell"); // reset all cell classes
+			$(".reset-btn").text("Reset");
+
+			clearInterval(blinker); // stop interval
+		}
 
 		const _numToToken = (num) => { 
 			return num === -1 ? "" : num ? "X" : "O";
@@ -115,10 +139,9 @@ $(document).ready(function() {
 
 			if (game.isGameOver()) {
 				$(".game-board").children().off("click"); // remove all click handlers
-
-				setInterval(_blink, 300);
-
 				$(".reset-btn").text("Play Again?");
+
+				blinker = setInterval(_blink, 300);				
 			}	
 				// render gameover screen (flashing os?)
 				// render a button to play again
@@ -128,19 +151,16 @@ $(document).ready(function() {
 
 		const _blink = () => {			
 			game.getCurrentWinState().forEach(index => {
-				console.log()
 				$(".game-cell").eq(index).toggleClass("hidden");							
 			}); 
 
 			// clearInterval();
 		}
 
-
-
-		return { render };
+		return { initialRender };
 	})();		
 
-	displayController.render();
+	displayController.initialRender();
 });
 
 
