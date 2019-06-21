@@ -1,11 +1,3 @@
-/**
- * empty = -1
- * O = 0
- * X = 1
- */
-
-
-
 $(document).ready(function() {	
 
 	/**
@@ -16,12 +8,11 @@ $(document).ready(function() {
 		const token = playerToken;
 		let score = 0;
 		
-		const markAt = (pos) => {
+		const setgetTokenAt = (pos) => {
 			gameBoard.getMatrix()[pos] = token;
-
 		};
 
-		return { markAt };
+		return { setgetTokenAt };
 	}; 
 
 
@@ -30,10 +21,11 @@ $(document).ready(function() {
 	 * @desc included vars + fns deal with game state and logic
 	 */
 	const game = (() => {
-		let currentWinState = null; 
 		let currentPlayer = 0;
-		const playerO = player(0);
-		const playerX = player(1);		
+		let currentWinState = null; 
+		let computerPlaying = true;
+		// const playerO = player(0);
+		// const playerX = player(1);		
 		const winStates = [
 			[0,1,2],
 			[3,4,5],
@@ -47,6 +39,7 @@ $(document).ready(function() {
 
 		const getCurrentPlayer = () => currentPlayer;
 		const getCurrentWinState = () => currentWinState;
+		const isComputerPlaying = () => computerPlaying;
 
 		const reset = () => {
 			currentWinState = null;
@@ -77,7 +70,7 @@ $(document).ready(function() {
 		}
 
 		const playTurn = (pos) => {		
-			currentPlayer ? playerX.markAt(pos) : playerO.markAt(pos);
+			currentPlayer ? gameBoard.setTokenAt(pos,1) : gameBoard.setTokenAt(pos,0);
 
 			currentPlayer = Number(!currentPlayer);
 		};
@@ -85,6 +78,7 @@ $(document).ready(function() {
 		return { 
 			getCurrentPlayer,
 			getCurrentWinState,
+			isComputerPlaying,
 			reset,
 			isGameOver,
 			playTurn };
@@ -93,12 +87,21 @@ $(document).ready(function() {
 
 	/**
 	 * Game Board Module
-	 * @desc contains game board data and fns
-	 */
+	 * @desc contains game board data and fns that manipulate it
+	 * @tokenLegend -1 = empty, 0 = O, 1 = X
+ 	 */	 
 	const gameBoard = (() => {
 		const matrix = [-1,-1,-1,-1,-1,-1,-1,-1,-1];
 		
 		const getMatrix = () => matrix;
+
+		const getTokenAt = (pos) => { 
+			return matrix[pos]; 
+		}
+
+		const setTokenAt = (pos, token) => {
+			matrix[pos] = token;
+		}
 
 		const reset = () => {
 			for (let i = 0; i < matrix.length; i++) {
@@ -106,7 +109,11 @@ $(document).ready(function() {
 			}
 		};
 
-		return { getMatrix, reset };
+		return { 
+				getMatrix,
+				getTokenAt,
+				setTokenAt,
+				reset };
 	})();
 
 
@@ -116,7 +123,7 @@ $(document).ready(function() {
 	 * @desc included fns manipulate and render DOM 
 	 */
 	const displayController = (() => {
-		let blinker = null;
+		let _blinker = null;
 		
 		const render = () => {
 			for (let i = 0; i < 9; i++) { // render initial empty game board
@@ -139,7 +146,7 @@ $(document).ready(function() {
 			$(".msg-panel .intro-display").css("display", "inline");
 			$(".msg-panel .turn-display").text((_numToTokenEmoji(game.getCurrentPlayer())) + " goes first!");
 
-			clearInterval(blinker); // stop interval
+			clearInterval(_blinker); // stop interval
 		};
 
 		const _markCell = (e) => {
@@ -148,13 +155,17 @@ $(document).ready(function() {
 			if (cell.text() !== "") return;
 
 			cell.text(_numToTokenString(game.getCurrentPlayer()));	// mark cell in GUI			
-			cell.addClass(cell.text() === "X" ? "x-token" : "y-token");	
+			cell.addClass(game.getCurrentPlayer() === 1 ? "x-token" : "y-token");	
 			game.playTurn(cell.index());	// mark cell in model
 
 			$(".msg-panel .intro-display").css("display", "none"); 
 			$(".msg-panel .turn-display").text("It's " + (_numToTokenEmoji(game.getCurrentPlayer())) + "'s turn");
 
-			if (game.isGameOver()) _renderGameOver();																			
+			if (game.isGameOver()) {
+				_renderGameOver();
+			} else if (game.isComputerPlaying()) {
+				_renderComputerTurn();
+			}
 		}; 
 
 		const _renderGameOver = () => {
@@ -165,8 +176,22 @@ $(document).ready(function() {
 				$(".msg-panel .turn-display").text("It's a tie... 😅");
 			} else {
 				$(".msg-panel .turn-display").text(_numToTokenEmoji(!game.getCurrentPlayer()) + " won!!!");
-				blinker = setInterval(_blink, 300);	// three winning tokens blink repeatedly 	
+				_blinker = setInterval(_blink, 300);	// three winning tokens blink repeatedly 	
 			}											
+		};
+
+		const _renderComputerTurn = () => {
+
+			while (true) {
+				let computerPos = Math.floor(Math.random() * 9);
+
+				if (gameBoard.getTokenAt(computerPos) === -1) {
+					$(".game-cell").eq(computerPos).text(_numToTokenString(game.getCurrentPlayer()));	// mark cell in GUI			
+					$(".game-cell").eq(computerPos).addClass(game.getCurrentPlayer() === 1 ? "x-token" : "y-token");	
+					game.playTurn(computerPos);
+					break;
+				}
+			} 
 		};
 
 		const _blink = () => { 			
