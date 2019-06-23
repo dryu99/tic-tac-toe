@@ -129,10 +129,22 @@ $(document).ready(function() {
 		};
 
 		const _playRound = (e) => {
-			if ($(e.target).text() === "") {
+			if ($(e.target).text() === "") { // if clicked cell is empty, play a round
 				_markCell($(e.target)); 
 				_updateMsgPanel(); 
-				_checkGameState();
+				if (game.isGameOver()) {
+					_renderGameOver();
+					return;
+				}				
+
+				if (game.isComputerPlaying()) { // if comp state on, play comp's turn
+					_renderComputerTurn(); 
+
+					if (game.isGameOver()) {
+						_renderGameOver();
+						return;
+					}
+				}				
 			}			
 		};
 
@@ -160,16 +172,7 @@ $(document).ready(function() {
 				$(".intro-display").css("display", "none"); 											
 
 			$(".turn-display").text("It's " + (_numToTokenEmoji(game.getCurrentPlayer())) + "'s turn");
-		};
-		
-		const _checkGameState = (e) => {
-			if (game.isGameOver()) { // check if game is over
-				_renderGameOver();
-				return;
-			} 
-			
-			if (game.isComputerPlaying()) _renderComputerTurn(); // check if comp is playing			
-		};			 
+		};		 
 
 		const _renderGameOver = () => {
 			$(".game-cell").off("click"); 
@@ -188,10 +191,7 @@ $(document).ready(function() {
 				let computerPos = Math.floor(Math.random() * 9);
 
 				if (gameBoard.getTokenAt(computerPos) === -1) {
-					_markCell($(".game-cell").eq(computerPos));
-					_renderComputerTurn();
-
-					if (game.isGameOver()) _renderGameOver();
+					_markCell($(".game-cell").eq(computerPos));					
 					break;
 				}
 			} 
