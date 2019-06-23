@@ -123,21 +123,23 @@ $(document).ready(function() {
 				cell.addClass("game-cell");										
 			  $(".game-board").append(cell);
 			}
-			_assignCellListeners();
 
+			$(".game-cell").click(_playRound); // register listeners
 			$(".reset-btn").click(_reset);
 		};
 
-		const _assignCellListeners = () => {
-			$(".game-cell").click(_markCell); 
-			$(".game-cell").click(_updateMsgPanel); 
-			$(".game-cell").click(_checkGameState); 
-		}
+		const _playRound = (e) => {
+			if ($(e.target).text() === "") {
+				_markCell($(e.target)); 
+				_updateMsgPanel(); 
+				_checkGameState();
+			}			
+		};
 
 		const _reset = (e) => {			
 			$(".game-cell").text(""); // reset GUI
 			$(".game-cell").attr("class", "game-cell"); 
-			_assignCellListeners();
+			$(".game-cell").click(_playRound);
 			$(".reset-btn").text("Reset");
 			game.reset(); // reset game data
 
@@ -147,19 +149,13 @@ $(document).ready(function() {
 			clearInterval(_blinker); // stop interval
 		};
 
-		const _markCell = (e) => {
-			let cell = $(e.target);
-			if (cell.text() !== "") return;
-
+		const _markCell = (cell) => { // given cell must be a jQuery object
 			cell.text(_numToTokenString(game.getCurrentPlayer()));	// mark cell in GUI			
 			cell.addClass(game.getCurrentPlayer() === 1 ? "x-token" : "y-token");	
 			game.playTurn(cell.index());	// mark cell in game data			
 		};
 		
-		const _updateMsgPanel = (e) => {
-			// let cell = $(e.target);
-			// if (cell.text() !== "") return;
-
+		const _updateMsgPanel = () => {
 			if ($(".intro-display").css("display") !== "none") // if intro display not hidden, hide it				
 				$(".intro-display").css("display", "none"); 											
 
@@ -167,21 +163,16 @@ $(document).ready(function() {
 		};
 		
 		const _checkGameState = (e) => {
-			// let cell = $(e.target);
-			// if (cell.text() !== "") return;
-
 			if (game.isGameOver()) { // check if game is over
 				_renderGameOver();
 				return;
 			} 
 			
-			if (game.isComputerPlaying()) { // check if comp is playing
-				_renderComputerTurn();
-			}
+			if (game.isComputerPlaying()) _renderComputerTurn(); // check if comp is playing			
 		};			 
 
 		const _renderGameOver = () => {
-			$(".game-board").children().off("click"); 
+			$(".game-cell").off("click"); 
 			$(".reset-btn").text("New Game");
 			
 			if (game.getCurrentWinState() === null) {
@@ -197,9 +188,8 @@ $(document).ready(function() {
 				let computerPos = Math.floor(Math.random() * 9);
 
 				if (gameBoard.getTokenAt(computerPos) === -1) {
-					$(".game-cell").eq(computerPos).text(_numToTokenString(game.getCurrentPlayer()));	// mark cell in GUI			
-					$(".game-cell").eq(computerPos).addClass(game.getCurrentPlayer() === 1 ? "x-token" : "y-token");	
-					game.playTurn(computerPos);
+					_markCell($(".game-cell").eq(computerPos));
+					_renderComputerTurn();
 
 					if (game.isGameOver()) _renderGameOver();
 					break;
