@@ -31,7 +31,14 @@ $(document).ready(function() {
 
 		const getCurrentPlayer = () => currentPlayer;
 		const getCurrentWinState = () => currentWinState;
-		const isComputerPlaying = () => computerPlaying;
+
+		const isComputerPlaying = (...args) => {
+			if (args.length === 0) {	// if no args, return opponent state, ow set opponent state 
+				return computerPlaying;
+			} else {
+				computerPlaying = args[0];	
+			}			
+		};
 
 		const reset = () => {
 			currentWinState = null;
@@ -126,6 +133,8 @@ $(document).ready(function() {
 
 			$(".game-cell").click(_playRound); // register listeners
 			$(".reset-btn").click(_reset);
+			$(".play-human-btn").click(_playAgainstHuman);
+			$(".play-comp-btn").click(_playAgainstComputer);
 		};
 
 		const _playRound = (e) => {
@@ -160,6 +169,16 @@ $(document).ready(function() {
 
 			clearInterval(_blinker); // stop interval
 		};
+
+		const _playAgainstHuman = (e) => {
+			game.isComputerPlaying(false);
+			console.log("playing against human now");
+		}
+
+		const _playAgainstComputer = (e) => {
+			game.isComputerPlaying(true);
+			console.log("playing against computer now");
+		}
 
 		const _markCell = (cell) => { // given cell must be a jQuery object
 			cell.text(_numToTokenString(game.getCurrentPlayer()));	// mark cell in GUI			
