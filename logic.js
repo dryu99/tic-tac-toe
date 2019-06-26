@@ -129,7 +129,7 @@ $(document).ready(function() {
 				const cell = $("<div>").text(_numToTokenString(gameBoard.getMatrix()[i])); 
 				cell.addClass("game-cell");										
 			  $(".game-board").append(cell);
-			}
+			}			
 
 			$(".reset-btn").click(_reset); // register listeners
 			$(".play-human-btn").click(_playAgainstHuman);
@@ -143,7 +143,12 @@ $(document).ready(function() {
 			} 
 
 			$(".intro-display").css("display", "inline"); // reset intro messages
-			$(".turn-display").text((_numToTokenEmoji(game.getCurrentPlayer())) + " goes first!");
+			if (game.isComputerPlaying()) {
+				$(".turn-display").text("You go first!");
+			} else {
+				$(".turn-display").text((_numToTokenEmoji(game.getCurrentPlayer())) + " goes first!");
+			}
+			
 
 			$(".game-cell").text(""); // reset game board
 			$(".game-cell").attr("class", "game-cell"); 
@@ -159,6 +164,8 @@ $(document).ready(function() {
 			$(".opponent-panel").css("display", "none");
 			$(".info-panel").css("display", "block");
 			$(".game-cell").click(_playRound);  // enable cells to be clicked
+
+			$(".turn-display").text((_numToTokenEmoji(game.getCurrentPlayer())) + " goes first!");
 		}
 
 		const _playAgainstComputer = (e) => {
@@ -166,6 +173,8 @@ $(document).ready(function() {
 			$(".opponent-panel").css("display", "none");
 			$(".info-panel").css("display", "block");
 			$(".game-cell").click(_playRound);  // enable cells to be clicked
+
+			$(".turn-display").text("You go first!");
 		}
 
 		const _playRound = (e) => {
@@ -173,7 +182,7 @@ $(document).ready(function() {
 				_markCell($(e.target)); 
 				_updateMsgPanel(); 
 				if (game.isGameOver()) {
-					_renderGameOver();
+					_renderGameOver(false);
 					return;
 				}				
 
@@ -181,7 +190,7 @@ $(document).ready(function() {
 					_renderComputerTurn(); 
 
 					if (game.isGameOver()) {
-						_renderGameOver();
+						_renderGameOver(true);
 						return;
 					}
 				}				
@@ -198,17 +207,40 @@ $(document).ready(function() {
 			if ($(".intro-display").css("display") !== "none") // if intro display not hidden, hide it				
 				$(".intro-display").css("display", "none"); 											
 
-			$(".turn-display").text("It's " + (_numToTokenEmoji(game.getCurrentPlayer())) + "'s turn");
+			if (game.isComputerPlaying()) {
+				let text = "";
+
+				switch (Math.floor(Math.random() * 3)) {
+					case 0:
+						text = "Make your move!";
+						break;
+					case 1:
+						text = "Nice move...";	
+						break;
+					default:
+						text = "Coolio movio";
+				}
+				$(".turn-display").text(text);	
+			} else {
+				$(".turn-display").text("It's " + (_numToTokenEmoji(game.getCurrentPlayer())) + "'s turn");
+			}			
 		};		 
 
-		const _renderGameOver = () => {
+		const _renderGameOver = (didCompWin) => {
 			$(".game-cell").off("click"); 
 			$(".reset-btn").text("New Game");
 			
 			if (game.getCurrentWinState() === null) {
 				$(".turn-display").text("It's a tie... 😅");
 			} else {
-				$(".turn-display").text(_numToTokenEmoji(!game.getCurrentPlayer()) + " won!!!");
+				if (!didCompWin && game.isComputerPlaying()) { 				// if you won and playing against comp
+					$(".turn-display").text("You won!!!");					
+				} else if (didCompWin && game.isComputerPlaying()) { 	// if comp won
+					$(".turn-display").text("The computer won...");										
+				} else {																							// if playing against human
+					$(".turn-display").text(_numToTokenEmoji(!game.getCurrentPlayer()) + " won!!!");
+				}
+				
 				_blinker = setInterval(_blink, 300);	// three winning tokens blink repeatedly 	
 			}											
 		};
