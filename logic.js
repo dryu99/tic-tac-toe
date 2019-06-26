@@ -131,11 +131,42 @@ $(document).ready(function() {
 			  $(".game-board").append(cell);
 			}
 
-			$(".game-cell").click(_playRound); // register listeners
-			$(".reset-btn").click(_reset);
+			$(".reset-btn").click(_reset); // register listeners
 			$(".play-human-btn").click(_playAgainstHuman);
 			$(".play-comp-btn").click(_playAgainstComputer);
 		};
+
+		const _reset = (e) => {			
+			if ($(".reset-btn").text() === "New Game") { 
+				$(".opponent-panel").css("display", "block");  // return to opponent select screen
+				$(".info-panel").css("display", "none");				
+			} 
+
+			$(".intro-display").css("display", "inline"); // reset intro messages
+			$(".turn-display").text((_numToTokenEmoji(game.getCurrentPlayer())) + " goes first!");
+
+			$(".game-cell").text(""); // reset game board
+			$(".game-cell").attr("class", "game-cell"); 
+			if ($(".reset-btn").text() === "Reset") $(".game-cell").click(_playRound);
+			$(".reset-btn").text("Reset");
+
+			game.reset(); // reset game data
+			clearInterval(_blinker); // stop interval
+		};
+
+		const _playAgainstHuman = (e) => {
+			game.isComputerPlaying(false);
+			$(".opponent-panel").css("display", "none");
+			$(".info-panel").css("display", "block");
+			$(".game-cell").click(_playRound);  // enable cells to be clicked
+		}
+
+		const _playAgainstComputer = (e) => {
+			game.isComputerPlaying(true);
+			$(".opponent-panel").css("display", "none");
+			$(".info-panel").css("display", "block");
+			$(".game-cell").click(_playRound);  // enable cells to be clicked
+		}
 
 		const _playRound = (e) => {
 			if ($(e.target).text() === "") { // if clicked cell is empty, play a round
@@ -157,29 +188,6 @@ $(document).ready(function() {
 			}			
 		};
 
-		const _reset = (e) => {			
-			$(".game-cell").text(""); // reset GUI
-			$(".game-cell").attr("class", "game-cell"); 
-			$(".game-cell").click(_playRound);
-			$(".reset-btn").text("Reset");
-			game.reset(); // reset game data
-
-			$(".intro-display").css("display", "inline"); // reset message panel 
-			$(".turn-display").text((_numToTokenEmoji(game.getCurrentPlayer())) + " goes first!");
-
-			clearInterval(_blinker); // stop interval
-		};
-
-		const _playAgainstHuman = (e) => {
-			game.isComputerPlaying(false);
-			console.log("playing against human now");
-		}
-
-		const _playAgainstComputer = (e) => {
-			game.isComputerPlaying(true);
-			console.log("playing against computer now");
-		}
-
 		const _markCell = (cell) => { // given cell must be a jQuery object
 			cell.text(_numToTokenString(game.getCurrentPlayer()));	// mark cell in GUI			
 			cell.addClass(game.getCurrentPlayer() === 1 ? "x-token" : "y-token");	
@@ -198,9 +206,9 @@ $(document).ready(function() {
 			$(".reset-btn").text("New Game");
 			
 			if (game.getCurrentWinState() === null) {
-				$(".msg-panel .turn-display").text("It's a tie... 😅");
+				$(".turn-display").text("It's a tie... 😅");
 			} else {
-				$(".msg-panel .turn-display").text(_numToTokenEmoji(!game.getCurrentPlayer()) + " won!!!");
+				$(".turn-display").text(_numToTokenEmoji(!game.getCurrentPlayer()) + " won!!!");
 				_blinker = setInterval(_blink, 300);	// three winning tokens blink repeatedly 	
 			}											
 		};
