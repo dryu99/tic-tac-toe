@@ -1,31 +1,13 @@
 $(document).ready(function() {	
 
 	/**
-	 * Player factory function
-	 * @desc a player that has a x/o token
-	 */
-	const player = (playerToken) => {
-		const token = playerToken;
-		let score = 0;
-		
-		const setgetTokenAt = (pos) => {
-			gameBoard.getMatrix()[pos] = token;
-		};
-
-		return { setgetTokenAt };
-	}; 
-
-
-	/**
 	 * Game Module
 	 * @desc included vars + fns deal with game state and logic
 	 */
 	const game = (() => {
 		let currentPlayer = 0;
 		let currentWinState = null; 
-		let computerPlaying = true;
-		// const playerO = player(0);
-		// const playerX = player(1);		
+		let computerPlaying = true;	
 		const winStates = [[0,1,2], [3,4,5], [6,7,8], [0,3,6],
 											 [0,4,8], [1,4,7], [2,4,6], [2,5,8]];	
 
@@ -114,7 +96,6 @@ $(document).ready(function() {
 				setTokenAt,
 				reset };
 	})();
-
 
 
 	/**
